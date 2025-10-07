@@ -124,7 +124,7 @@ jobs:
           mvn -B verify --file pom.xml -Dorg.wildfly.openssl.path="/usr/local/src/openssl-3.1.2" -Dversion.org.wildfly.openssl.natives=$WILDFLY_OPENSSL_NATIVES_VERSION
       - if: ${{ github.event_name == 'push' }}
         name: Archive the built native artifacts if this is a tag
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: built-natives
           path: |
