@@ -15,7 +15,7 @@ jobs:
         working-directory: main
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-15-intel]
         java: ['11', '17', '21']
         include:
           - os: windows-latest
@@ -41,7 +41,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Maven Version Info
         run: mvn -version
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'macos-15-intel'
         name: OpenSSL Library Version Info on MacOS
         run: |
           export PATH="/usr/local/opt/openssl@3/bin:$PATH"
@@ -50,13 +50,13 @@ jobs:
         name: Install OpenSSL Library on Windows
         run: |
           vcpkg install openssl[core,tools] --triplet x64-windows
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'macos-15-intel'
         name: Build WildFly OpenSSL natives on MacOS
         id: build-wildfly-openssl-natives
         run: |
           export PATH="/usr/local/opt/openssl@3/bin:$PATH"
           echo "OpenSSL version used is:"
-          openssl version 
+          openssl version
           mvn -B install --file pom.xml
           echo "WILDFLY_OPENSSL_NATIVES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       - if: matrix.os == 'windows-latest'
@@ -82,7 +82,7 @@ jobs:
           for /f "tokens=3 delims=<> skip=1" %%v in ('findstr "<version>" ..\main\pom.xml') do set WILDFLY_OPENSSL_NATIVES_VERSION=%%v
           echo Running tests with WildFly OpenSSL Natives %WILDFLY_OPENSSL_NATIVES_VERSION%
           mvn -B verify --file pom.xml -Dorg.wildfly.openssl.path="C:\vcpkg\installed\x64-windows\tools\openssl" -Dversion.org.wildfly.openssl.natives=%WILDFLY_OPENSSL_NATIVES_VERSION%
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'macos-15-intel'
         name: Run tests with the built MacOS native
         working-directory: wildfly-openssl
         run: |
@@ -111,7 +111,7 @@ jobs:
         run: |
           export PATH=/usr/local/ssl/bin:$PATH
           echo "OpenSSL version used is:"
-          openssl version 
+          openssl version
           mvn -B install --file pom.xml
           echo "WILDFLY_OPENSSL_NATIVES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       - if: matrix.os == 'ubuntu-latest'
