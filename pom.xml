@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>35</version>
+        <version>51</version>
     </parent>
 
     <groupId>org.wildfly.openssl</groupId>
@@ -31,10 +31,34 @@
 
     <packaging>pom</packaging>
 
+    <name>WildFly OpenSSL Natives</name>
+    <description>Project containing the WildFly OpenSSL Native builds</description>
+    <url>hhttps://github.com/wildfly-security/wildfly-openssl-natives</url>
+
+    <developers>
+        <developer>
+            <name>Darran Lofthouse</name>
+            <email>darran.lofthouse@jboss.com</email>
+            <organization>WildFly</organization>
+            <organizationUrl>https://www.wildfly.org/</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:wildfly-security/wildfly-openssl-natives.git</connection>
+        <developerConnection>scm:git:git@github.com:wildfly-security/wildfly-openssl-natives.git</developerConnection>
+        <url>https://github.com/wildfly-security/wildfly-openssl-natives</url>
+      <tag>HEAD</tag>
+    </scm>
+
     <properties>
-        <jdk.min.version>11</jdk.min.version>
+        <jdk.min.version>21</jdk.min.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.org.wildfly.checkstyle>1.0.8.Final</version.org.wildfly.checkstyle>
+        <!-- Release Properties -->
+        <nexus.repository.staging>wildfly-staging</nexus.repository.staging>
+        <nexus.repository.release>wildfly-security</nexus.repository.release>
+        <nexus.staging.tag>wildfly-openssl-natives-${project.version}</nexus.staging.tag>
     </properties>
 
     <licenses>
