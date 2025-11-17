@@ -15,7 +15,7 @@
     </parent>
 
     <groupId>org.wildfly.openssl</groupId>
-    <artifactId>wildfly-openssl-natives-linux-rhel9-x86_64</artifactId>
+    <artifactId>wildfly-openssl-linux-rhel9-x86_64</artifactId>
     <version>2.2.3.CR1-SNAPSHOT</version>
 
     <packaging>jar</packaging>
