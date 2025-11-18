@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-15-intel]
-        java: ['11', '17', '21']
+        java: ['21', '25']
         include:
           - os: windows-latest
             vcvars: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat
@@ -57,6 +57,7 @@ jobs:
           export PATH="/usr/local/opt/openssl@3/bin:$PATH"
           echo "OpenSSL version used is:"
           openssl version
+          mvn -B package --file pom.xml -Dnative-build
           mvn -B install --file pom.xml
           echo "WILDFLY_OPENSSL_NATIVES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       - if: matrix.os == 'windows-latest'
@@ -68,7 +69,20 @@ jobs:
           call "%VCVARS%" x64
           set PATH=C:\vcpkg\installed\x64-windows\tools\openssl;%PATH%
           openssl version -v
+          echo "About to run build step"
+          mvn -B package --file pom.xml -Dnative-build
+      - if: matrix.os == 'windows-latest'
+        name: Package previously built WildFly OpenSSL Natives on Windows
+        env:
+          VCVARS: ${{ matrix.vcvars }}
+        shell: cmd
+        run: |
+          call "%VCVARS%" x64
+          set PATH=C:\vcpkg\installed\x64-windows\tools\openssl;%PATH%
+          openssl version -v
+          echo "About to run package step"
           mvn -B install --file pom.xml
+          echo "All build steps complete"
       - if: matrix.os == 'windows-latest'
         name: Run tests with the built Windows native
         env:
@@ -91,6 +105,13 @@ jobs:
           export WILDFLY_OPENSSL_NATIVES_VERSION=${{ steps.build-wildfly-openssl-natives.outputs.WILDFLY_OPENSSL_NATIVES_VERSION }}
           echo Running tests with WildFly OpenSSL Natives $WILDFLY_OPENSSL_NATIVES_VERSION
           mvn -B verify --file pom.xml -Dorg.wildfly.openssl.path="/usr/local/opt/openssl@3/lib" -Dversion.org.wildfly.openssl.natives=$WILDFLY_OPENSSL_NATIVES_VERSION
+      - name: Upload poms
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-poms
+          path: |
+            **/pom.xml
       - if: matrix.os == 'ubuntu-latest'
         name: Install latest version of OpenSSL in Ubuntu
         run: |
@@ -112,6 +133,7 @@ jobs:
           export PATH=/usr/local/ssl/bin:$PATH
           echo "OpenSSL version used is:"
           openssl version
+          mvn -B package --file pom.xml -Dnative-build
           mvn -B install --file pom.xml
           echo "WILDFLY_OPENSSL_NATIVES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       - if: matrix.os == 'ubuntu-latest'
@@ -123,10 +145,10 @@ jobs:
           export WILDFLY_OPENSSL_NATIVES_VERSION=${{ steps.build-wildfly-openssl-natives-on-ubuntu.outputs.WILDFLY_OPENSSL_NATIVES_VERSION }}
           echo Running tests with WildFly OpenSSL Natives $WILDFLY_OPENSSL_NATIVES_VERSION
           mvn -B verify --file pom.xml -Dorg.wildfly.openssl.path="/usr/local/src/openssl-3.1.2" -Dversion.org.wildfly.openssl.natives=$WILDFLY_OPENSSL_NATIVES_VERSION
-      - if: ${{ github.event_name == 'push' }}
-        name: Archive the built native artifacts if this is a tag
+      #- if: ${{ github.event_name == 'push' }}
+      - name: Archive the built native artifacts if this is a tag
         uses: actions/upload-artifact@v4
         with:
-          name: built-natives
+          name: built-natives-${{ matrix.os}}-${{ matrix.java }}
           path: |
-            **/target/**.jar
+            main/target/lib/**
